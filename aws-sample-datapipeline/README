@@ -1,0 +1,44 @@
+This is a sample data pipeline for processing json events in AWS Firehose/Lambda/S3.  If the json events found in the ingestion firehose stream are malformed the lambda function will format that event as JSON, otherwise the initial JSON is simply transfered to S3.  The stages of the data pipeline are as follows:
+
+
+## ARCHITECTURE/FLOW
+
+ -> "Ingestion" Firehose Delivery Stream
+ -> "Ingestion" S3 Bucket
+ -> "Processing" Lambda [ -> SNS (errors) ]
+ -> "Processed" Firehose Delivery Stream
+ -> "Processed" S3 [ -> SNS (success) ]
+
+### Detail
+
+1. Events are emitted onto the initial "ingestion" Firehose Delivery Stream
+    1. The expected format of each event is properly formatted JSON with a trailing newline
+1. The above Delivery Stream will ship the events in batch format to an "incoming" S3 bucket
+1. The S3 bucket notifies the "processing" Lambda function of a new file
+1. The "processing" Lambda function reads the events from each new file line by line
+1. For each event/line the Lambda function attempts to validate the event JSON
+    1. If valid: the event is re-emitted to a final "processed" Firehose Delivery Stream as is
+    1. If invalid: the text of the event is packaged into valid json of the following format {"raw_message" : <raw_message>} and emitted to the "processed" delivery stream
+1. The processed delivery stream ships the events in batch the final "processed" s3 bucket, the events in the final s3 files will also be newline separated
+
+
+## NOTES
+
+* S3 Notifications and circular dependencies: it appears that if you attempt to reference cloudformation S3 resources which have notifications set up, you may run into circular dependencies.  AWS's recommendation is either to run 2-stage deploys, or to hard code the S3 ARN references which closes the circular dependency loop.  The latter strategy is used here which is why you can see string concatenations used to create the s3 bucket ARNs instead of directory references.
+
+## DEPLOYMENT
+
+Using the aws cli deployment would look like this:
+
+```
+ aws cloudformation deploy --template-file ./main.yaml --stack-name nd-datapipeline --capabilities CAPABILITY_IAM  --parameter-overrides LambdaErrorEmail=trolls@pksoftwareco.com PipelineSuccessEmail=celebrate@pksoftwareco.com
+```
+
+## Alarms & Logs
+
+* Only 1 alarm is set up to trigger in this datapipeline, that is if the lambda function fails.
+* The firehose streams will log to cloudwatch logs as well as the lambda function.
+
+## VERIFY
+
+When verifying this pipeline in AWS, if you use the built in AWS Dashboard ability to "Send Demo Data" to the ingestion delivery stream you will find that the json does not process and you end up with processed json which contains the error case json ("raw_message").  This is because the demo data is not newline delimited like we would expect and actual producer to send us content.  The up side is that we get to see that our error case is covered here.
