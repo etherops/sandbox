@@ -22,6 +22,12 @@ def solve_array(string, position, character):
     l[position] = character
     return ''.join(l) 
 
+def solve_iteration(string, position, character):
+    new_string = ''
+    for i in range(len(string)):
+       new_string += string[i] if position != i else character 
+    return new_string
+
 def solve_generator(string, position, character):
     return "".join(solve_generator_generator(string, position, character))
 
@@ -42,7 +48,13 @@ solve_array(test_string, test_string_pos, test_string_char)
 t1 = time.time()
 print "Elapsed time: " + str(t1 - t0)
 
-print "Solving with generator"
+print "Solving with normal iteration"
+t0 = time.time()
+solve_iteration(test_string, test_string_pos, test_string_char)
+t1 = time.time()
+print "Elapsed time: " + str(t1 - t0)
+
+print "Solving with generato iteration"
 t0 = time.time()
 solve_generator(test_string, test_string_pos, test_string_char)
 t1 = time.time()
