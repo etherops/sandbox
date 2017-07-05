@@ -8,11 +8,11 @@ $ ./compare_substring_replace_strategy_perf.py 10000
 Testing for string length of 10000
 Solving with concatenation
 Elapsed time: 2.121925354e-05
-Solving with array converstion
+Solving with array conversion
 Elapsed time: 0.000351905822754
 Solving with normal iteration
 Elapsed time: 0.00219011306763
-Solving with generato iteration
+Solving with generator iteration
 Elapsed time: 0.00143480300903
 ```
 
