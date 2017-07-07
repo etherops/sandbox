@@ -42,7 +42,7 @@ solve_concat(test_string, test_string_pos, test_string_char)
 t1 = time.time()
 print "Elapsed time: " + str(t1 - t0)
 
-print "Solving with array converstion"
+print "Solving with array conversion"
 t0 = time.time()
 solve_array(test_string, test_string_pos, test_string_char)
 t1 = time.time()
@@ -54,7 +54,7 @@ solve_iteration(test_string, test_string_pos, test_string_char)
 t1 = time.time()
 print "Elapsed time: " + str(t1 - t0)
 
-print "Solving with generato iteration"
+print "Solving with generator iteration"
 t0 = time.time()
 solve_generator(test_string, test_string_pos, test_string_char)
 t1 = time.time()
